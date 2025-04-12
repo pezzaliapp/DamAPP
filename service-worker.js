@@ -1,4 +1,4 @@
-self.addEventListener('install', (e) => {
+service_worker_js = """self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open('damapp-cache').then((cache) => {
       return cache.addAll([
