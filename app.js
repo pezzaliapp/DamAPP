@@ -82,13 +82,6 @@ function onSquareClick(r, c) {
     gameState[r][c] = 'red';
     gameState[sr][sc] = null;
     selected = null;
-    // controllo se ci sono ulteriori catture dalla nuova posizione
-    const nextCaptures = getValidMovesForPiece(r, c, 'red').filter(m => m.capture);
-    if (move.capture && nextCaptures.length > 0) {
-      selected = { r, c };
-      renderBoard();
-      return;
-    }
     turn = 'black';
     updateStatus();
     renderBoard();
@@ -139,31 +132,52 @@ function getAllValidMoves(color) {
   return captures.length > 0 ? captures : moves;
 }
 
-
 function aiMove() {
-  const depth = 3;
-  let current = gameState;
-  let move = getBestMove(current, depth, true);
-  while (move) {
+  const moves = getAllValidMoves('black');
+  if (moves.length > 0) {
+    const move = moves[Math.floor(Math.random() * moves.length)];
     const { from, to, capture } = move;
     if (capture) gameState[capture.r][capture.c] = null;
     gameState[to.r][to.c] = 'black';
     gameState[from.r][from.c] = null;
-
-    const more = getValidMovesForPiece(to.r, to.c, 'black', gameState).filter(m => m.capture);
-    if (capture && more.length > 0) {
-      move = more[0]; // esegui la prossima cattura automatica
-      move.from = { r: to.r, c: to.c };
-    } else {
-      move = null;
-    }
   }
-
   turn = 'red';
   updateStatus();
   renderBoard();
 }
 
+resetGameState();
+createBoard();
+updateStatus();
+renderBoard();
+
+function toggleHints() {
+  showHints = !showHints;
+  renderBoard();
+}
+
+function newGame() {
+  resetGameState();
+  selected = null;
+  turn = 'red';
+  updateStatus();
+  renderBoard();
+}
+
+
+function aiMove() {
+  const depth = 3;
+  let bestMove = getBestMove(gameState, depth, true);
+  if (bestMove) {
+    const { from, to, capture } = bestMove;
+    if (capture) gameState[capture.r][capture.c] = null;
+    gameState[to.r][to.c] = 'black';
+    gameState[from.r][from.c] = null;
+  }
+  turn = 'red';
+  updateStatus();
+  renderBoard();
+}
 
 function getBestMove(state, depth, isMaximizing) {
   let moves = getAllValidMoves('black', state);
