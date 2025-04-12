@@ -78,8 +78,6 @@ function aiMove() {
     const { from, to } = best.move;
     gameState[to.row][to.col] = gameState[from.row][from.col];
     gameState[from.row][from.col] = null;
-  } else {
-    console.log('Nessuna mossa trovata per IA');
   }
   turn = 'red';
   status.innerText = 'Turno: Utente (Rosso)';
@@ -87,6 +85,39 @@ function aiMove() {
 }
 
 function getAllMoves(state, isAI) {
+  const moves = [];
+  const captures = [];
+  const color = isAI ? 'black' : 'red';
+  const direction = isAI ? 1 : -1;
+
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      if (state[r][c] === color) {
+        const dirs = [[direction, -1], [direction, 1]];
+        for (const [dr, dc] of dirs) {
+          const nr = r + dr;
+          const nc = c + dc;
+          if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+            if (!state[nr][nc]) {
+              moves.push({ from: { row: r, col: c }, to: { row: nr, col: nc } });
+            } else {
+              const enemy = state[nr][nc];
+              if (enemy && enemy !== color) {
+                const jumpR = r + 2 * dr;
+                const jumpC = c + 2 * dc;
+                if (jumpR >= 0 && jumpR < 8 && jumpC >= 0 && jumpC < 8 && !state[jumpR][jumpC]) {
+                  captures.push({ from: { row: r, col: c }, to: { row: jumpR, col: jumpC }, capture: { row: nr, col: nc } });
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return captures.length > 0 ? captures : moves;
+}
   const moves = [];
   const color = isAI ? 'black' : 'red';
   for (let r = 0; r < 8; r++) {
