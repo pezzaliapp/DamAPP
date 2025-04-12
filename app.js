@@ -78,6 +78,8 @@ function aiMove() {
     const { from, to } = best.move;
     gameState[to.row][to.col] = gameState[from.row][from.col];
     gameState[from.row][from.col] = null;
+  } else {
+    console.log('Nessuna mossa trovata per IA');
   }
   turn = 'red';
   status.innerText = 'Turno: Utente (Rosso)';
