@@ -9,8 +9,12 @@
 </head>
 <body>
   <h1>DamAPP</h1>
-  <div id="board"></div>
+  <div>
+    <button onclick="toggleHints()">💡 Mostra mosse valide</button>
+    <button onclick="newGame()">🔄 Nuova partita</button>
+  </div>
   <p id="status">Turno: Utente (Rosso)</p>
+  <div id="board"></div>
   <script src="app.js"></script>
 </body>
 </html>

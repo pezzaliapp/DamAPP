@@ -4,6 +4,7 @@ const status = document.getElementById('status');
 let selected = null;
 let turn = 'red';
 let gameState = [];
+let showHints = false;
 
 function resetGameState() {
   gameState = Array(8).fill(null).map(() => Array(8).fill(null));
@@ -33,9 +34,16 @@ function createBoard() {
 }
 
 function renderBoard() {
+  let hints = [];
+  if (showHints && selected) {
+    let { r, c } = selected;
+    hints = getValidMovesForPiece(r, c, 'red').map(m => m.to.r * 8 + m.to.c);
+  }
+
   for (let r = 0; r < 8; r++) {
     for (let c = 0; c < 8; c++) {
       const square = board.children[r * 8 + c];
+      if (hints.includes(r * 8 + c)) square.classList.add('hint'); else square.classList.remove('hint');
       square.innerHTML = '';
       const piece = gameState[r][c];
       if (piece) {
@@ -142,3 +150,16 @@ resetGameState();
 createBoard();
 updateStatus();
 renderBoard();
+
+function toggleHints() {
+  showHints = !showHints;
+  renderBoard();
+}
+
+function newGame() {
+  resetGameState();
+  selected = null;
+  turn = 'red';
+  updateStatus();
+  renderBoard();
+}
