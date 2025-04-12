@@ -49,6 +49,9 @@ h1 {
   margin-bottom: 20px;
 }
 
+.black {
+  background-color: #f5deb3; /* colore panna/beige per visibilità */
+}
 .square.hint {
-  outline: 3px solid yellow;
+  outline: 3px dashed gold;
 }
