@@ -1,4 +1,4 @@
-body {
+style_css = """body {
   font-family: sans-serif;
   text-align: center;
   background: #f4f4f4;
@@ -14,11 +14,11 @@ body {
   width: 60px;
   height: 60px;
 }
-.dark {
-  background-color: #444;
-}
 .light {
   background-color: #eee;
+}
+.dark {
+  background-color: #444;
 }
 .piece {
   width: 50px;
@@ -32,7 +32,4 @@ body {
 }
 .black {
   background-color: black;
-}
-.selected {
-  outline: 3px solid yellow;
 }
