@@ -30,7 +30,6 @@ function createBoard() {
       board.appendChild(square);
     }
   }
-  renderBoard();
 }
 
 function renderBoard() {
@@ -43,8 +42,10 @@ function renderBoard() {
   for (let r = 0; r < 8; r++) {
     for (let c = 0; c < 8; c++) {
       const square = board.children[r * 8 + c];
-      if (hints.includes(r * 8 + c)) square.classList.add('hint'); else square.classList.remove('hint');
       square.innerHTML = '';
+      if (hints.includes(r * 8 + c)) square.classList.add('hint');
+      else square.classList.remove('hint');
+
       const piece = gameState[r][c];
       if (piece) {
         const div = document.createElement('div');
@@ -66,6 +67,7 @@ function updateStatus() {
 function onPieceClick(r, c) {
   if (turn === 'red' && gameState[r][c] === 'red') {
     selected = { r, c };
+    renderBoard();
   }
 }
 
@@ -82,74 +84,20 @@ function onSquareClick(r, c) {
     gameState[r][c] = 'red';
     gameState[sr][sc] = null;
     selected = null;
+
+    const nextCaptures = getValidMovesForPiece(r, c, 'red').filter(m => m.capture);
+    if (move.capture && nextCaptures.length > 0) {
+      selected = { r, c };
+      renderBoard();
+      return;
+    }
+
     turn = 'black';
     updateStatus();
     renderBoard();
-    setTimeout(aiMove, 500);
+    setTimeout(aiMove, 300);
   }
 }
-
-function getValidMovesForPiece(r, c, color) {
-  let valid = [];
-  let dr = color === 'red' ? -1 : 1;
-  let deltas = [-1, 1];
-
-  for (let dc of deltas) {
-    let midR = r + dr, midC = c + dc;
-    let landR = r + 2 * dr, landC = c + 2 * dc;
-    if (landR >= 0 && landR < 8 && landC >= 0 && landC < 8) {
-      if (gameState[midR][midC] && gameState[midR][midC] !== color && !gameState[landR][landC]) {
-        valid.push({ from: { r, c }, to: { r: landR, c: landC }, capture: { r: midR, c: midC } });
-      }
-    }
-  }
-
-  if (valid.length > 0) return valid;
-
-  for (let dc of deltas) {
-    let newR = r + dr, newC = c + dc;
-    if (newR >= 0 && newR < 8 && newC >= 0 && newC < 8 && !gameState[newR][newC]) {
-      valid.push({ from: { r, c }, to: { r: newR, c: newC } });
-    }
-  }
-
-  return valid;
-}
-
-function getAllValidMoves(color) {
-  let moves = [], captures = [];
-  for (let r = 0; r < 8; r++) {
-    for (let c = 0; c < 8; c++) {
-      if (gameState[r][c] === color) {
-        let m = getValidMovesForPiece(r, c, color);
-        m.forEach(move => {
-          moves.push(move);
-          if (move.capture) captures.push(move);
-        });
-      }
-    }
-  }
-  return captures.length > 0 ? captures : moves;
-}
-
-function aiMove() {
-  const moves = getAllValidMoves('black');
-  if (moves.length > 0) {
-    const move = moves[Math.floor(Math.random() * moves.length)];
-    const { from, to, capture } = move;
-    if (capture) gameState[capture.r][capture.c] = null;
-    gameState[to.r][to.c] = 'black';
-    gameState[from.r][from.c] = null;
-  }
-  turn = 'red';
-  updateStatus();
-  renderBoard();
-}
-
-resetGameState();
-createBoard();
-updateStatus();
-renderBoard();
 
 function toggleHints() {
   showHints = !showHints;
@@ -164,15 +112,23 @@ function newGame() {
   renderBoard();
 }
 
-
 function aiMove() {
   const depth = 3;
-  let bestMove = getBestMove(gameState, depth, true);
-  if (bestMove) {
-    const { from, to, capture } = bestMove;
+  let current = gameState;
+  let move = getBestMove(current, depth, true);
+  while (move) {
+    const { from, to, capture } = move;
     if (capture) gameState[capture.r][capture.c] = null;
     gameState[to.r][to.c] = 'black';
     gameState[from.r][from.c] = null;
+
+    const more = getValidMovesForPiece(to.r, to.c, 'black', gameState).filter(m => m.capture);
+    if (capture && more.length > 0) {
+      move = more[0];
+      move.from = { r: to.r, c: to.c };
+    } else {
+      move = null;
+    }
   }
   turn = 'red';
   updateStatus();
@@ -198,7 +154,6 @@ function getBestMove(state, depth, isMaximizing) {
 
 function minimax(state, depth, isMaximizing) {
   if (depth === 0) return evaluateBoard(state);
-
   let color = isMaximizing ? 'black' : 'red';
   let moves = getAllValidMoves(color, state);
   if (moves.length === 0) return isMaximizing ? -1000 : 1000;
@@ -289,3 +244,8 @@ function getValidMovesForPiece(r, c, color, stateOverride) {
   }
   return valid;
 }
+
+resetGameState();
+createBoard();
+updateStatus();
+renderBoard();
