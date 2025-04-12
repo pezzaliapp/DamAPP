@@ -1,4 +1,4 @@
-{
+manifest_json = """{
   "name": "DamAPP",
   "short_name": "DamAPP",
   "start_url": "./index.html",
